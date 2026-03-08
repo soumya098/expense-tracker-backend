@@ -1,8 +1,11 @@
 package com.soumya.expense_tracker_backend.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.soumya.expense_tracker_backend.dto.ExpenseRequest;
@@ -10,6 +13,7 @@ import com.soumya.expense_tracker_backend.dto.ExpenseResponse;
 import com.soumya.expense_tracker_backend.entity.Expense;
 import com.soumya.expense_tracker_backend.exception.ResourceNotFoundException;
 import com.soumya.expense_tracker_backend.repository.ExpenseRepository;
+import com.soumya.expense_tracker_backend.specification.ExpenseSpecification;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,6 +39,20 @@ public class ExpenseService {
     return expenseRepository.findAll().stream()
         .map(expense -> modelMapper.map(expense, ExpenseResponse.class))
         .toList();
+  }
+
+  public List<ExpenseResponse> getAllExpenses(
+      String category,
+      LocalDate startDate,
+      LocalDate endDate,
+      BigDecimal minAmount,
+      BigDecimal maxAmount) {
+
+    Specification<Expense> spec = ExpenseSpecification.withFilters(
+        category, startDate, endDate, minAmount, maxAmount);
+
+    return expenseRepository.findAll(spec).stream()
+        .map(expense -> modelMapper.map(expense, ExpenseResponse.class)).toList();
   }
 
   public ExpenseResponse getExpenseById(Long id) {
