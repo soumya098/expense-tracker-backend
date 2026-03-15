@@ -1,15 +1,19 @@
 package com.soumya.expense_tracker_backend.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
-import org.modelmapper.ModelMapper;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.soumya.expense_tracker_backend.dto.ExpenseRequest;
 import com.soumya.expense_tracker_backend.dto.ExpenseResponse;
 import com.soumya.expense_tracker_backend.entity.Expense;
 import com.soumya.expense_tracker_backend.exception.ResourceNotFoundException;
+import com.soumya.expense_tracker_backend.mapper.ExpenseMapper;
 import com.soumya.expense_tracker_backend.repository.ExpenseRepository;
+import com.soumya.expense_tracker_backend.specification.ExpenseSpecification;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ExpenseService {
   private final ExpenseRepository expenseRepository;
-  private final ModelMapper modelMapper;
+  private final ExpenseMapper modelMapper;
 
   public ExpenseResponse createExpense(ExpenseRequest expenseRequest) {
     Expense expense = Expense.builder()
@@ -32,9 +36,20 @@ public class ExpenseService {
   }
 
   public List<ExpenseResponse> getAllExpenses() {
-    return expenseRepository.findAll().stream()
-        .map(expense -> modelMapper.map(expense, ExpenseResponse.class))
-        .toList();
+    return modelMapper.toResponseList(expenseRepository.findAll());
+  }
+
+  public List<ExpenseResponse> getAllExpenses(
+      String category,
+      LocalDate startDate,
+      LocalDate endDate,
+      BigDecimal minAmount,
+      BigDecimal maxAmount) {
+
+    Specification<Expense> spec = ExpenseSpecification.withFilters(
+        category, startDate, endDate, minAmount, maxAmount);
+
+    return modelMapper.toResponseList(expenseRepository.findAll(spec));
   }
 
   public ExpenseResponse getExpenseById(Long id) {
@@ -53,7 +68,7 @@ public class ExpenseService {
     expense.setDescription(expenseRequest.getDescription());
 
     Expense updatedExpense = expenseRepository.save(expense);
-    return modelMapper.map(updatedExpense, ExpenseResponse.class);
+    return modelMapper.toResponse(updatedExpense);
   }
 
   public void deleteExpense(Long id) {
