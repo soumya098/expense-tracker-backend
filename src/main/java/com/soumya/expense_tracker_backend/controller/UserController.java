@@ -19,18 +19,6 @@ public class UserController {
   private final UserService userService;
 
   /**
-   * Register a new user
-   */
-  @PostMapping("/register")
-  @ResponseStatus(HttpStatus.CREATED)
-  public ResponseEntity<UserResponse> registerUser(
-      @Valid @RequestBody UserRegistrationRequest request) {
-
-    UserResponse response = userService.register(request);
-    return ResponseEntity.status(HttpStatus.CREATED).body(response);
-  }
-
-  /**
    * Get current authenticated user's profile
    * (will be secured later with JWT)
    */

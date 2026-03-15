@@ -1,68 +1,89 @@
 package com.soumya.expense_tracker_backend.exception;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import com.soumya.expense_tracker_backend.dto.ApiError;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
   // Handle validation errors (e.g. @NotNull, @DecimalMin violations)
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<Map<String, Object>> handleValidationExceptions(
-      MethodArgumentNotValidException ex) {
+  public ResponseEntity<ApiError> handleValidationExceptions(MethodArgumentNotValidException ex,
+      HttpServletRequest request) {
 
-    Map<String, String> fieldErrors = new HashMap<>();
-    ex.getBindingResult().getAllErrors().forEach(error -> {
-      String fieldName = ((FieldError) error).getField();
-      String errorMessage = error.getDefaultMessage();
-      fieldErrors.put(fieldName, errorMessage);
-    });
+    String message = ex.getBindingResult().getFieldErrors().stream()
+        .map(err -> err.getField() + ": " + err.getDefaultMessage()).findFirst().orElse("Validation Error");
 
-    Map<String, Object> response = new HashMap<>();
-    response.put("timestamp", LocalDateTime.now());
-    response.put("status", HttpStatus.BAD_REQUEST.value());
-    response.put("error", "Validation Failed");
-    response.put("message", "Invalid request data");
-    response.put("details", fieldErrors);
+    ApiError error = new ApiError(
+        LocalDateTime.now(),
+        HttpStatus.BAD_REQUEST.value(),
+        "Bad Request",
+        message,
+        request.getRequestURI());
 
-    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    return ResponseEntity.badRequest().body(error);
   }
 
   // Handle our custom not-found exception
   @ExceptionHandler(ResourceNotFoundException.class)
-  public ResponseEntity<Map<String, Object>> handleResourceNotFound(
-      ResourceNotFoundException ex) {
+  public ResponseEntity<ApiError> handleResourceNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
 
-    Map<String, Object> response = new HashMap<>();
-    response.put("timestamp", LocalDateTime.now());
-    response.put("status", HttpStatus.NOT_FOUND.value());
-    response.put("error", "Not Found");
-    response.put("message", ex.getMessage());
-    response.put("path", ""); // can be enhanced later with request path
+    ApiError error = new ApiError(
+        LocalDateTime.now(),
+        HttpStatus.NOT_FOUND.value(),
+        "Not Found",
+        ex.getMessage(),
+        request.getRequestURI());
 
-    return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+  }
+
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
+
+    ApiError error = new ApiError(
+        LocalDateTime.now(),
+        HttpStatus.BAD_REQUEST.value(),
+        "Bad Request",
+        ex.getMessage(),
+        request.getRequestURI());
+
+    return ResponseEntity.badRequest().body(error);
+  }
+
+  @ExceptionHandler(AuthenticationException.class)
+  public ResponseEntity<ApiError> handleAuth(AuthenticationException ex, HttpServletRequest request) {
+
+    ApiError error = new ApiError(
+        LocalDateTime.now(),
+        HttpStatus.UNAUTHORIZED.value(),
+        "Unauthorized",
+        ex.getMessage(),
+        request.getRequestURI());
+
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
   }
 
   // Catch-all for unexpected runtime exceptions
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
+  public ResponseEntity<ApiError> handleGenericException(Exception ex, HttpServletRequest request) {
 
-    Map<String, Object> response = new HashMap<>();
-    response.put("timestamp", LocalDateTime.now());
-    response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-    response.put("error", "Internal Server Error");
-    response.put("message", ex.getMessage());
-    // In production: don't expose ex.getMessage() → log it instead
-    // response.put("message", "Something went wrong. Please try again later.");
+    ApiError error = new ApiError(
+        LocalDateTime.now(),
+        HttpStatus.INTERNAL_SERVER_ERROR.value(),
+        "Internal Server Error",
+        "An unexpected error occurred",
+        request.getRequestURI());
 
-    return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
   }
 }
