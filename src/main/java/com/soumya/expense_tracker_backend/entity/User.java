@@ -1,7 +1,6 @@
 package com.soumya.expense_tracker_backend.entity;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;

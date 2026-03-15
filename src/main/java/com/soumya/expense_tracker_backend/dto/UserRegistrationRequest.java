@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record UserRegistrationRequest(
-                @NotBlank @Size(min = 3, max = 50) String username,
-                @NotBlank @Email String email,
-                @NotBlank @Size(min = 8) String password, // plain text – hash in service
-                @Size(max = 100) String fullName) {
+    @NotBlank @Size(min = 3, max = 50) String username,
+    @NotBlank @Email String email,
+    @NotBlank @Size(min = 8) String password, // plain text – hash in service
+    @Size(max = 100) String fullName) {
 }

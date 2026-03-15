@@ -9,6 +9,9 @@ import com.soumya.expense_tracker_backend.dto.RefreshTokenRequest;
 import com.soumya.expense_tracker_backend.dto.UserRegistrationRequest;
 import com.soumya.expense_tracker_backend.entity.RefreshToken;
 import com.soumya.expense_tracker_backend.entity.User;
+import com.soumya.expense_tracker_backend.exception.AuthenticationException;
+import com.soumya.expense_tracker_backend.exception.ResourceNotFoundException;
+import com.soumya.expense_tracker_backend.exception.UserAlreadyExistsException;
 import com.soumya.expense_tracker_backend.repository.UserRepository;
 import com.soumya.expense_tracker_backend.security.JwtService;
 
@@ -24,6 +27,13 @@ public class AuthService {
   private final RefreshTokenService refreshTokenService;
 
   public AuthResponse register(UserRegistrationRequest request) {
+    if (userRepository.existsByUsername(request.username())) {
+      throw new UserAlreadyExistsException("Username already taken");
+    }
+
+    if (userRepository.existsByEmail(request.email())) {
+      throw new UserAlreadyExistsException("Email already registered");
+    }
 
     User user = new User();
     user.setUsername(request.username());
@@ -42,10 +52,10 @@ public class AuthService {
   public AuthResponse login(LoginRequest request) {
 
     User user = userRepository.findByUsername(request.username())
-        .orElseThrow(() -> new RuntimeException("User not found"));
+        .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
     if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
-      throw new RuntimeException("Invalid credentials");
+      throw new AuthenticationException("Invalid credentials");
     }
 
     String token = jwtService.generateToken(user);
