@@ -63,5 +63,13 @@ public class User {
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Account> accounts;
 
+  // One user can have many categories
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Category> categories;
+
+  // One user can have many transactions
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Transaction> transactions;
+
   // Optional: later add roles, enabled, lastLogin, etc.
 }
