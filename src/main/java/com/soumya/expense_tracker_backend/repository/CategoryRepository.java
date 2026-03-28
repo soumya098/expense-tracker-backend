@@ -3,15 +3,19 @@ package com.soumya.expense_tracker_backend.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
-import com.soumya.expense_tracker_backend.constant.TransactionType;
 import com.soumya.expense_tracker_backend.entity.Category;
-import com.soumya.expense_tracker_backend.entity.User;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-  List<Category> findByTypeAndIsDefaultTrue(TransactionType type);
+  Boolean existsByNameAndIsDefaultTrue(String name);
 
-  List<Category> findByUserAndType(User user, TransactionType type);
+  List<Category> findByIsDefaultTrue();
+
+  List<Category> findByIdAndUserId(Long id, Long userId);
+
+  @Query("SELECT c FROM Category c WHERE c.user.id = :userId OR c.isDefault = true")
+  List<Category> findAllForUser(Long userId);
 
 }

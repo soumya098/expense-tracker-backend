@@ -17,6 +17,8 @@ public interface AccountMapper {
   @Mapping(target = "currentBalance", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)
+  @Mapping(target = "transactions", ignore = true)
+  @Mapping(target = "active", ignore = true)
   Account toEntity(AccountRequest request);
 
   AccountResponse toResponse(Account account);

@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.soumya.expense_tracker_backend.dto.AccountRequest;
 import com.soumya.expense_tracker_backend.dto.AccountResponse;
-import com.soumya.expense_tracker_backend.entity.User;
 import com.soumya.expense_tracker_backend.security.UserPrincipal;
 import com.soumya.expense_tracker_backend.service.AccountService;
 

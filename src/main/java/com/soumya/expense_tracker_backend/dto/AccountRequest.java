@@ -2,12 +2,14 @@ package com.soumya.expense_tracker_backend.dto;
 
 import java.math.BigDecimal;
 
+import com.soumya.expense_tracker_backend.constant.AccountType;
+
 import jakarta.validation.constraints.NotBlank;
 
 public record AccountRequest(
     @NotBlank String name,
-    String type, // e.g. "CHECKING", "SAVINGS"
-    @NotBlank String currency, // default "INR" in service if null
+    AccountType type,
+    @NotBlank String currency,
     BigDecimal currentBalance,
     String description,
     String accountNumber,

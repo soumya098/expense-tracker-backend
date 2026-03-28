@@ -4,8 +4,12 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.soumya.expense_tracker_backend.constant.AccountType;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,7 +27,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "accounts", uniqueConstraints={ @UniqueConstraint(columnNames={"user_id", "name"}) })
+@Table(name = "accounts", uniqueConstraints = { @UniqueConstraint(columnNames = { "user_id", "name" }) })
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -41,7 +45,8 @@ public class Account {
   private String name;
 
   @Column(length = 50)
-  private String type; // CHECKING, SAVINGS, CREDIT_CARD, CASH, INVESTMENT
+  @Enumerated(EnumType.STRING)
+  private AccountType type; // CHECKING, SAVINGS, CREDIT_CARD, CASH, INVESTMENT
 
   @Column(nullable = false)
   private String currency; // "INR", "USD" — default "INR"

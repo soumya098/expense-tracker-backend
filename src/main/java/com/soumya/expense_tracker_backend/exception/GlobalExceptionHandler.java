@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -124,6 +125,28 @@ public class GlobalExceptionHandler {
         request.getRequestURI());
 
     return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+  }
+
+  /**
+   * Handles HttpMessageNotReadableException, which is thrown when an invalid
+   * value is provided for an enum field.
+   * Returns a 400 response with an appropriate error message.
+   * 
+   * @param ex      the HttpMessageNotReadableException
+   * @param request the current HTTP request
+   * @return a ResponseEntity containing an ApiError object with a 400 status code
+   */
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ApiError> handleInvalidEnum(HttpMessageNotReadableException ex, HttpServletRequest request) {
+
+    ApiError error = new ApiError(
+        LocalDateTime.now(),
+        HttpStatus.BAD_REQUEST.value(),
+        "Bad Request",
+        "Invalid value for enum field",
+        request.getRequestURI());
+
+    return ResponseEntity.badRequest().body(error);
   }
 
   /**
