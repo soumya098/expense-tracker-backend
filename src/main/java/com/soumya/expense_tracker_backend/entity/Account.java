@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -17,13 +16,14 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "accounts")
+@Table(name = "accounts", uniqueConstraints={ @UniqueConstraint(columnNames={"user_id", "name"}) })
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -45,6 +45,9 @@ public class Account {
 
   @Column(nullable = false)
   private String currency; // "INR", "USD" — default "INR"
+
+  @Builder.Default
+  private Boolean active = true;
 
   private BigDecimal currentBalance; // optional – can be computed instead
 

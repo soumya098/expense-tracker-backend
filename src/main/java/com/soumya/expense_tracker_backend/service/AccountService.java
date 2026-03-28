@@ -11,29 +11,29 @@ import com.soumya.expense_tracker_backend.entity.User;
 import com.soumya.expense_tracker_backend.exception.ResourceNotFoundException;
 import com.soumya.expense_tracker_backend.mapper.AccountMapper;
 import com.soumya.expense_tracker_backend.repository.AccountRepository;
-import com.soumya.expense_tracker_backend.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class AccountService {
 
-  private final UserRepository userRepository; // later: replace with security
-
   private final AccountRepository accountRepository;
   private final AccountMapper modelMapper;
-  private final UserService userService;
 
-  public AccountResponse createAccount(Long userId, AccountRequest request) {
-    User user = userService.findByUserId(userId); // or getCurrentUser()
-    // later: replace with authenticated user
-
+  public AccountResponse createAccount(AccountRequest request, User user) {
+    if (accountRepository.existsByNameAndUserId(request.name(), user.getId())) {
+      throw new IllegalArgumentException("Account already exists");
+    }
     Account account = Account.builder()
         .user(user)
         .name(request.name())
         .type(request.type())
-        .currency(request.currency() != null ? request.currency() : "INR")
+        .currency(request.currency())
+        .currentBalance(request.currentBalance())
         .description(request.description())
+        .accountNumber(request.accountNumber())
+        .ifscCode(request.ifscCode())
         .build();
 
     Account saved = accountRepository.save(account);
@@ -41,17 +41,43 @@ public class AccountService {
     return modelMapper.toResponse(saved);
   }
 
-  public List<AccountResponse> getAccountsForUser(Long userId) {
-    if (!userRepository.existsById(userId)) { // later: replace with security
-      throw new ResourceNotFoundException("User not found with id: " + userId);
-    }
-    return modelMapper.toResponseList(accountRepository.findByUserId(userId));
+  public List<AccountResponse> getAllAccountsForUser(User user) {
+    return modelMapper.toResponseList(accountRepository.findByUserId(user.getId()));
   }
 
-  public AccountResponse getAccount(Long accountId, Long userId) {
-    Account account = accountRepository.findByIdAndUserId(accountId, userId)
-        .orElseThrow(() -> new ResourceNotFoundException("Account not found or access denied"));
+  public List<AccountResponse> getAllActiveAccountsForUser(User user) {
+    return modelMapper.toResponseList(accountRepository.findByUserIdAndActiveTrue(user.getId()));
+  }
+
+  public AccountResponse getAccount(Long accountId, User user) {
+    Account account = accountRepository.findByIdAndUserId(accountId, user.getId())
+        .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
 
     return modelMapper.toResponse(account);
+  }
+
+  public AccountResponse updateAccount(Long accountId, User user, AccountRequest request) {
+    Account account = accountRepository.findByIdAndUserId(accountId, user.getId())
+        .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+
+    account.setName(request.name() != null ? request.name() : account.getName());
+    account.setType(request.type() != null ? request.type() : account.getType());
+    account.setCurrency(request.currency() != null ? request.currency() : account.getCurrency());
+    account
+        .setCurrentBalance(request.currentBalance() != null ? request.currentBalance() : account.getCurrentBalance());
+    account.setDescription(request.description() != null ? request.description() : account.getDescription());
+    account.setAccountNumber(request.accountNumber() != null ? request.accountNumber() : account.getAccountNumber());
+    account.setIfscCode(request.ifscCode() != null ? request.ifscCode() : account.getIfscCode());
+
+    Account saved = accountRepository.save(account);
+
+    return modelMapper.toResponse(saved);
+  }
+
+  public void deleteAccount(Long accountId, User user) {
+    Account account = accountRepository.findByIdAndUserId(accountId, user.getId())
+        .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+    account.setActive(false); // soft delete
+    accountRepository.save(account);
   }
 }
