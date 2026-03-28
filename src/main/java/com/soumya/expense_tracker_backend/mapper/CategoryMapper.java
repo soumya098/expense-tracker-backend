@@ -8,8 +8,9 @@ import org.mapstruct.Mapping;
 import com.soumya.expense_tracker_backend.dto.CategoryRequest;
 import com.soumya.expense_tracker_backend.dto.CategoryResponse;
 import com.soumya.expense_tracker_backend.entity.Category;
+import com.soumya.expense_tracker_backend.util.NormalizationService;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = NormalizationService.class)
 public interface CategoryMapper {
   
   @Mapping(target = "id", ignore = true)
@@ -18,6 +19,7 @@ public interface CategoryMapper {
   @Mapping(target = "updatedAt", ignore = true)
   @Mapping(target = "transactions", ignore = true)
   @Mapping(target = "isDefault", ignore = true)
+  @Mapping(target = "name", source = "name", qualifiedByName = "normalize")
   Category toEntity(CategoryRequest request);
 
   CategoryResponse toResponse(Category category);

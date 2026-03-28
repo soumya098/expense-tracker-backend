@@ -1,7 +1,5 @@
 package com.soumya.expense_tracker_backend.config;
 
-import java.util.List;
-
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -44,7 +42,7 @@ public class CategorySeeder implements CommandLineRunner {
 
   private void seedIfNotExists(String name, TransactionType type) {
 
-    boolean exists = repo.existsByNameAndIsDefaultTrue(name);
+    boolean exists = repo.existsByNameIgnoreCaseAndIsDefaultTrue(name);
 
     if (!exists) {
       repo.save(create(name, type));
@@ -53,7 +51,7 @@ public class CategorySeeder implements CommandLineRunner {
 
   private Category create(String name, TransactionType type) {
     Category c = new Category();
-    c.setName(name);
+    c.setName(name.trim().toLowerCase());
     c.setType(type);
     c.setIsDefault(true);
     return c;

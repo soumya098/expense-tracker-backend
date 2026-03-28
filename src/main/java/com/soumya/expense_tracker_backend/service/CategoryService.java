@@ -8,6 +8,8 @@ import com.soumya.expense_tracker_backend.dto.CategoryRequest;
 import com.soumya.expense_tracker_backend.dto.CategoryResponse;
 import com.soumya.expense_tracker_backend.entity.Category;
 import com.soumya.expense_tracker_backend.entity.User;
+import com.soumya.expense_tracker_backend.exception.ResourceNotFoundException;
+import com.soumya.expense_tracker_backend.exception.UserAlreadyExistsException;
 import com.soumya.expense_tracker_backend.mapper.CategoryMapper;
 import com.soumya.expense_tracker_backend.repository.CategoryRepository;
 
@@ -27,10 +29,32 @@ public class CategoryService {
   }
 
   public CategoryResponse create(CategoryRequest request, User user) {
+
+    if (categoryRepository.existsForUserOrDefault(request.name(), user.getId())) {
+      throw new UserAlreadyExistsException("Category already exists");
+    }
+
     Category category = modelMapper.toEntity(request);
     category.setUser(user);
     category.setIsDefault(false);
     category = categoryRepository.save(category);
     return modelMapper.toResponse(category);
+  }
+
+  public void delete(Long id, User user) {
+    Category category = categoryRepository.findByIdAndUserId(id, user.getId())
+        .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+    boolean isDefault = category.getIsDefault();
+    if (isDefault) {
+      throw new IllegalArgumentException("Cannot delete system default categories");
+    }
+
+    // 🚫 Future-safe: check usage in transactions
+    // if (transactionRepository.existsByCategoryId(categoryId)) {
+    // throw new IllegalStateException("Category is used in transactions and cannot
+    // be deleted");
+    // }
+    categoryRepository.delete(category);
   }
 }

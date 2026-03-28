@@ -120,7 +120,7 @@ public class GlobalExceptionHandler {
     ApiError error = new ApiError(
         LocalDateTime.now(),
         HttpStatus.CONFLICT.value(),
-        "User Already Exists",
+        "Conflict",
         ex.getMessage(),
         request.getRequestURI());
 
