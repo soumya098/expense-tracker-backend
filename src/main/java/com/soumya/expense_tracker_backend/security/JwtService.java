@@ -12,6 +12,7 @@ import com.soumya.expense_tracker_backend.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 @Service
@@ -48,7 +49,7 @@ public class JwtService {
   }
 
   private Key getSigningKey() {
-    byte[] keyBytes = secret.getBytes();
+    byte[] keyBytes = Decoders.BASE64.decode(secret);
     return Keys.hmacShaKeyFor(keyBytes);
   }
 }
