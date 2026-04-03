@@ -54,6 +54,8 @@ public class Account {
   @Builder.Default
   private Boolean active = true;
 
+  private boolean isDefault; // optional – can be computed instead
+
   private BigDecimal currentBalance; // optional – can be computed instead
 
   private String description;

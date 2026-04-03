@@ -42,6 +42,13 @@ public class TransactionController {
     return ResponseEntity.ok(transactionService.getTransactionsForUser(user));
   }
 
+  @GetMapping("/account/{accountId}")
+  public ResponseEntity<List<TransactionResponse>> getAllByAccount(
+      @AuthenticationPrincipal(expression = "user") User user,
+      @PathVariable Long accountId) {
+    return ResponseEntity.ok(transactionService.getTransactionsForAccount(user, accountId));
+  }
+
   @GetMapping("/{id}")
   public ResponseEntity<TransactionResponse> getById(@AuthenticationPrincipal(expression = "user") User user,
       @PathVariable Long id) {

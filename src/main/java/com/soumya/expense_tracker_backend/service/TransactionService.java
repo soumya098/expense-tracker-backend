@@ -103,6 +103,11 @@ public class TransactionService {
   }
 
   public List<TransactionResponse> getTransactionsForAccount(User user, Long accountId) {
+    // Validate account ownership
+    if (!accountRepo.existsByIdAndUserId(accountId, user.getId())) {
+      throw new ResourceNotFoundException("Account not found");
+    }
+
     return transactionRepo.findByUserIdAndAccountId(user.getId(), accountId).stream()
         .map(transactionMapper::toResponse)
         .toList();

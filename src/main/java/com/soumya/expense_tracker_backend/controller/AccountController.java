@@ -75,4 +75,11 @@ public class AccountController {
     accountService.deleteAccount(accountId, userPrincipal.getUser());
     return ResponseEntity.noContent().build();
   }
+
+  @PutMapping("/{accountId}/default")
+  public ResponseEntity<Void> setDefault(@PathVariable Long accountId,
+      @AuthenticationPrincipal UserPrincipal userPrincipal) {
+    accountService.setDefaultAccount(accountId, userPrincipal.getUser());
+    return ResponseEntity.ok().build();
+  }
 }

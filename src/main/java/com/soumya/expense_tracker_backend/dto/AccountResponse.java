@@ -3,10 +3,13 @@ package com.soumya.expense_tracker_backend.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.soumya.expense_tracker_backend.constant.AccountType;
+
 public record AccountResponse(
     Long id,
     String name,
-    String type,
+    AccountType type,
+    boolean isDefault,
     String currency,
     BigDecimal currentBalance,
     String description,

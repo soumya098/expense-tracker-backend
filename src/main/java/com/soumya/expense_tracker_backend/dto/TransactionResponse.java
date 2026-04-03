@@ -20,5 +20,6 @@ public record TransactionResponse(
 
     Long categoryId,
     String categoryName,
-    boolean systemCategory) {
+    boolean systemCategory,
+    boolean isCredit) {
 }

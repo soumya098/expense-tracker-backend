@@ -11,8 +11,10 @@ import com.soumya.expense_tracker_backend.entity.User;
 import com.soumya.expense_tracker_backend.exception.ResourceNotFoundException;
 import com.soumya.expense_tracker_backend.mapper.AccountMapper;
 import com.soumya.expense_tracker_backend.repository.AccountRepository;
+import com.soumya.expense_tracker_backend.repository.TransactionRepository;
 import com.soumya.expense_tracker_backend.util.NormalizationService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -23,6 +25,7 @@ public class AccountService {
   private final AccountMapper modelMapper;
   private final NormalizationService normalizationService;
 
+  @Transactional
   public AccountResponse createAccount(AccountRequest request, User user) {
     if (accountRepository.existsByNameIgnoreCaseAndUserId(normalizationService.trim(request.name()), user.getId())) {
       throw new IllegalArgumentException("Account already exists");
@@ -73,6 +76,23 @@ public class AccountService {
     Account account = accountRepository.findByIdAndUserId(accountId, user.getId())
         .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
     account.setActive(false); // soft delete
+    accountRepository.save(account);
+  }
+
+  public void setDefaultAccount(Long accountId, User user) {
+    if (!accountRepository.existsByIdAndUserId(accountId, user.getId())) {
+      throw new ResourceNotFoundException("Account not found");
+    }
+    // Unset existing default
+    accountRepository.findByUserIdAndIsDefaultTrue(user.getId()).ifPresent(defaultAccount -> {
+      defaultAccount.setDefault(false);
+      accountRepository.save(defaultAccount);
+    });
+
+    // Set new default
+    Account account = accountRepository.findByIdAndUserId(accountId, user.getId())
+        .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+    account.setDefault(true);
     accountRepository.save(account);
   }
 }

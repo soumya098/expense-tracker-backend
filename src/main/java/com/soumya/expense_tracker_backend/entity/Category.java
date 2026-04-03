@@ -62,4 +62,8 @@ public class Category {
   protected void onUpdate() {
     this.updatedAt = LocalDateTime.now();
   }
+
+  public boolean isSystemCategory() {
+    return Boolean.TRUE.equals(this.isDefault);
+  }
 }
