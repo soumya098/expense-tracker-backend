@@ -8,8 +8,9 @@ import org.mapstruct.Mapping;
 import com.soumya.expense_tracker_backend.dto.AccountRequest;
 import com.soumya.expense_tracker_backend.dto.AccountResponse;
 import com.soumya.expense_tracker_backend.entity.Account;
+import com.soumya.expense_tracker_backend.util.NormalizationService;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = NormalizationService.class)
 public interface AccountMapper {
 
   @Mapping(target = "id", ignore = true)
@@ -19,6 +20,7 @@ public interface AccountMapper {
   @Mapping(target = "updatedAt", ignore = true)
   @Mapping(target = "transactions", ignore = true)
   @Mapping(target = "active", ignore = true)
+  @Mapping(target = "name", source = "name", qualifiedByName = "trim")
   Account toEntity(AccountRequest request);
 
   AccountResponse toResponse(Account account);

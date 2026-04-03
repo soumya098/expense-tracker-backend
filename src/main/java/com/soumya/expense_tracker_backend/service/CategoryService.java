@@ -8,8 +8,8 @@ import com.soumya.expense_tracker_backend.dto.CategoryRequest;
 import com.soumya.expense_tracker_backend.dto.CategoryResponse;
 import com.soumya.expense_tracker_backend.entity.Category;
 import com.soumya.expense_tracker_backend.entity.User;
+import com.soumya.expense_tracker_backend.exception.ResourceExistsException;
 import com.soumya.expense_tracker_backend.exception.ResourceNotFoundException;
-import com.soumya.expense_tracker_backend.exception.UserAlreadyExistsException;
 import com.soumya.expense_tracker_backend.mapper.CategoryMapper;
 import com.soumya.expense_tracker_backend.repository.CategoryRepository;
 
@@ -30,8 +30,8 @@ public class CategoryService {
 
   public CategoryResponse create(CategoryRequest request, User user) {
 
-    if (categoryRepository.existsForUserOrDefault(request.name(), user.getId())) {
-      throw new UserAlreadyExistsException("Category already exists");
+    if (categoryRepository.existsForUserOrDefault(request.name().trim(), user.getId())) {
+      throw new ResourceExistsException("Category already exists");
     }
 
     Category category = modelMapper.toEntity(request);

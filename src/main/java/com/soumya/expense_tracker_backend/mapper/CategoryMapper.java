@@ -19,7 +19,7 @@ public interface CategoryMapper {
   @Mapping(target = "updatedAt", ignore = true)
   @Mapping(target = "transactions", ignore = true)
   @Mapping(target = "isDefault", ignore = true)
-  @Mapping(target = "name", source = "name", qualifiedByName = "normalize")
+  @Mapping(target = "name", source = "name", qualifiedByName = "trim")
   Category toEntity(CategoryRequest request);
 
   CategoryResponse toResponse(Category category);

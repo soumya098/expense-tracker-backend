@@ -106,16 +106,16 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * Handles UserAlreadyExistsException, returns a 409 response with an
+   * Handles ResourceExistsException, returns a 409 response with an
    * appropriate
    * error message.
    *
-   * @param ex      the UserAlreadyExistsException
+   * @param ex      the ResourceExistsException
    * @param request the current HTTP request
    * @return a ResponseEntity containing an ApiError object with a 409 status code
    */
-  @ExceptionHandler(UserAlreadyExistsException.class)
-  public ResponseEntity<ApiError> handleUserExists(UserAlreadyExistsException ex, HttpServletRequest request) {
+  @ExceptionHandler(ResourceExistsException.class)
+  public ResponseEntity<ApiError> handleUserExists(ResourceExistsException ex, HttpServletRequest request) {
 
     ApiError error = new ApiError(
         LocalDateTime.now(),

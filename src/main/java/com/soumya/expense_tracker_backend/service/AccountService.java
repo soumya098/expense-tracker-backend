@@ -11,6 +11,7 @@ import com.soumya.expense_tracker_backend.entity.User;
 import com.soumya.expense_tracker_backend.exception.ResourceNotFoundException;
 import com.soumya.expense_tracker_backend.mapper.AccountMapper;
 import com.soumya.expense_tracker_backend.repository.AccountRepository;
+import com.soumya.expense_tracker_backend.util.NormalizationService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,21 +21,14 @@ public class AccountService {
 
   private final AccountRepository accountRepository;
   private final AccountMapper modelMapper;
+  private final NormalizationService normalizationService;
 
   public AccountResponse createAccount(AccountRequest request, User user) {
-    if (accountRepository.existsByNameAndUserId(request.name(), user.getId())) {
+    if (accountRepository.existsByNameIgnoreCaseAndUserId(normalizationService.trim(request.name()), user.getId())) {
       throw new IllegalArgumentException("Account already exists");
     }
-    Account account = Account.builder()
-        .user(user)
-        .name(request.name())
-        .type(request.type())
-        .currency(request.currency())
-        .currentBalance(request.currentBalance())
-        .description(request.description())
-        .accountNumber(request.accountNumber())
-        .ifscCode(request.ifscCode())
-        .build();
+    Account account = modelMapper.toEntity(request);
+    account.setUser(user);
 
     Account saved = accountRepository.save(account);
 
@@ -60,7 +54,8 @@ public class AccountService {
     Account account = accountRepository.findByIdAndUserId(accountId, user.getId())
         .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
 
-    account.setName(request.name() != null ? request.name() : account.getName());
+    String normalizedName = normalizationService.trim(request.name());
+    account.setName(normalizedName != null ? normalizedName : account.getName());
     account.setType(request.type() != null ? request.type() : account.getType());
     account.setCurrency(request.currency() != null ? request.currency() : account.getCurrency());
     account

@@ -12,12 +12,10 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
   boolean existsByNameIgnoreCaseAndIsDefaultTrue(String name);
 
-  boolean existsByNameIgnoreCaseAndUserId(String name, Long userId);
-
   @Query("""
           SELECT COUNT(c) > 0 FROM Category c
           WHERE LOWER(c.name) = LOWER(:name)
-          AND (c.isDefault = true OR c.user.id = :userId)
+          AND (c.isDefault = true OR (c.isDefault = false AND c.user.id = :userId))
       """)
   boolean existsForUserOrDefault(String name, Long userId);
 

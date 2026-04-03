@@ -12,4 +12,11 @@ public class NormalizationService {
       return null;
     return value.trim().toLowerCase();
   }
+
+  @Named("trim")
+  public String trim(String value) {
+    if (value == null)
+      return null;
+    return value.trim();
+  }
 }

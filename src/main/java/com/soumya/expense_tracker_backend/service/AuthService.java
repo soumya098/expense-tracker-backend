@@ -10,10 +10,11 @@ import com.soumya.expense_tracker_backend.dto.UserRegistrationRequest;
 import com.soumya.expense_tracker_backend.entity.RefreshToken;
 import com.soumya.expense_tracker_backend.entity.User;
 import com.soumya.expense_tracker_backend.exception.AuthenticationException;
+import com.soumya.expense_tracker_backend.exception.ResourceExistsException;
 import com.soumya.expense_tracker_backend.exception.ResourceNotFoundException;
-import com.soumya.expense_tracker_backend.exception.UserAlreadyExistsException;
 import com.soumya.expense_tracker_backend.repository.UserRepository;
 import com.soumya.expense_tracker_backend.security.JwtService;
+import com.soumya.expense_tracker_backend.util.NormalizationService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,20 +26,21 @@ public class AuthService {
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
   private final RefreshTokenService refreshTokenService;
+  private final NormalizationService normalizationService;
 
   public AuthResponse register(UserRegistrationRequest request) {
-    if (userRepository.existsByUsername(request.username())) {
-      throw new UserAlreadyExistsException("Username already taken");
+    if (userRepository.existsByUsernameIgnoreCase(request.username().trim())) {
+      throw new ResourceExistsException("Username already taken");
     }
 
-    if (userRepository.existsByEmail(request.email())) {
-      throw new UserAlreadyExistsException("Email already registered");
+    if (userRepository.existsByEmailIgnoreCase(request.email().trim())) {
+      throw new ResourceExistsException("Email already registered");
     }
 
     User user = new User();
-    user.setUsername(request.username());
-    user.setEmail(request.email());
-    user.setFullName(request.fullName());
+    user.setUsername(normalizationService.normalize(request.username()));
+    user.setEmail(normalizationService.normalize(request.email()));
+    user.setFullName(normalizationService.trim(request.fullName()));
     user.setPasswordHash(passwordEncoder.encode(request.password()));
 
     userRepository.save(user);
@@ -51,7 +53,7 @@ public class AuthService {
 
   public AuthResponse login(LoginRequest request) {
 
-    User user = userRepository.findByUsername(request.username())
+    User user = userRepository.findByUsernameIgnoreCase(request.username().trim())
         .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
     if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {

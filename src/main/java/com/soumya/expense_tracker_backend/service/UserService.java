@@ -21,10 +21,10 @@ public class UserService {
   private final PasswordEncoder passwordEncoder; // we'll add BCrypt soon
 
   public UserResponse register(UserRegistrationRequest request) {
-    if (userRepository.existsByUsername(request.username())) {
+    if (userRepository.existsByUsernameIgnoreCase(request.username().trim())) {
       throw new IllegalArgumentException("Username already taken");
     }
-    if (userRepository.existsByEmail(request.email())) {
+    if (userRepository.existsByEmailIgnoreCase(request.email().trim())) {
       throw new IllegalArgumentException("Email already registered");
     }
 

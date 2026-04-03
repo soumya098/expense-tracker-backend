@@ -41,17 +41,18 @@ public class CategorySeeder implements CommandLineRunner {
   }
 
   private void seedIfNotExists(String name, TransactionType type) {
+    String normalizedName = name.trim();
 
-    boolean exists = repo.existsByNameIgnoreCaseAndIsDefaultTrue(name);
+    boolean exists = repo.existsByNameIgnoreCaseAndIsDefaultTrue(normalizedName);
 
     if (!exists) {
-      repo.save(create(name, type));
+      repo.save(create(normalizedName, type));
     }
   }
 
   private Category create(String name, TransactionType type) {
     Category c = new Category();
-    c.setName(name.trim().toLowerCase());
+    c.setName(name);
     c.setType(type);
     c.setIsDefault(true);
     return c;

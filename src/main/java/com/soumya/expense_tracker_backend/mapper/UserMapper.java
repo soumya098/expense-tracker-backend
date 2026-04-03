@@ -1,14 +1,14 @@
 package com.soumya.expense_tracker_backend.mapper;
 
-import com.soumya.expense_tracker_backend.dto.UserRegistrationRequest;
-import com.soumya.expense_tracker_backend.dto.UserResponse;
-
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import com.soumya.expense_tracker_backend.dto.UserRegistrationRequest;
+import com.soumya.expense_tracker_backend.dto.UserResponse;
 import com.soumya.expense_tracker_backend.entity.User;
+import com.soumya.expense_tracker_backend.util.NormalizationService;
 
-@Mapper(componentModel = "spring") // Makes it a Spring bean
+@Mapper(componentModel = "spring", uses = NormalizationService.class) // Makes it a Spring bean
 public interface UserMapper {
 
   // Request → Entity (ignore passwordHash – we'll set it manually)
@@ -17,6 +17,10 @@ public interface UserMapper {
   @Mapping(target = "createdAt", ignore = true)
   @Mapping(target = "updatedAt", ignore = true)
   @Mapping(target = "accounts", ignore = true)
+  @Mapping(target = "categories", ignore = true)
+  @Mapping(target = "transactions", ignore = true)
+  @Mapping(target = "username", source = "username", qualifiedByName = "normalize")
+  @Mapping(target = "email", source = "email", qualifiedByName = "normalize")
   User toEntity(UserRegistrationRequest request);
 
   // Entity → Response (record)
