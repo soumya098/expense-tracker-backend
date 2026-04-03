@@ -40,7 +40,7 @@ public class Transaction {
 
   private String description;
 
-  private LocalDate transactionDate;
+  private LocalDate date;
 
   private String merchantName;
 
@@ -59,6 +59,11 @@ public class Transaction {
   private Account account;
 
   @ManyToOne
-  @JoinColumn(name = "category_id", nullable = false)
+  @JoinColumn(name = "category_id", nullable = true)
   private Category category;
+
+  // for transfer
+  @ManyToOne
+  @JoinColumn(name = "to_account_id")
+  private Account toAccount;
 }
